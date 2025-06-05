@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: colnomic-7b-deployment
+  namespace: colnomic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: colnomic-7b-server
+  template:
+    metadata:
+      labels:
+        app: colnomic-7b-server
+    spec:
+      containers:
+      - name: embedding-server
+        image: aulkiller/colnomic7b-embed:v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+          limits:
+            nvidia.com/gpu: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: colnomic7b-embedding-service
+  namespace: colnomic
+spec:
+  selector:
+    app: colnomic-7b-server
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8001
