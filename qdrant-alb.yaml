@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-colnomic-lb
+  namespace: colnomic
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external          # NLB
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+spec:
+  selector:
+    app.kubernetes.io/instance: qdrant-colnomic                          # Helm release
+    app.kubernetes.io/name: qdrant                                        # Chart name
+  type: LoadBalancer
+  loadBalancerClass: eks.amazonaws.com/nlb                               # EKS LB controller ≥ v2.4
+  ports:
+    # Expose Qdrant’s HTTP API on 80
+    - name: http
+      port: 80
+      targetPort: 6333
+      protocol: TCP
+    # Optional: expose gRPC on 6334 (adjust external port if you prefer)
+    - name: grpc
+      port: 6334
+      targetPort: 6334
+      protocol: TCP
+    # Optional: expose p2p on 6335
+    - name: p2p
+      port: 6335
+      targetPort: 6335
+      protocol: TCP
+
